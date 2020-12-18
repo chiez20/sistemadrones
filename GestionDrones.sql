@@ -1,4 +1,5 @@
 --Creacion de tablas
+
 create table DRON (
    DRON_ID              INT4                 not null,
    DRON_FECHAOPERACION  DATE                 null,
@@ -20,9 +21,9 @@ create table DRON_TIEMPO (
    constraint PK_DRON_TIEMPO primary key (DRONTIME_ID)
 );
 
+
 create table EMPLEADO (
    EMPLEADO_ID          INT4                 not null,
-   EMPLOPERAD_ID        INT4                 not null,
    EMPLEADO_NOMBRE      CHAR(15)             null,
    EMPLEADO_APELLIDO    CHAR(15)             null,
    EMPLEADO_CI          CHAR(20)             null,
@@ -31,11 +32,18 @@ create table EMPLEADO (
 
 create table EMPLEADO_OPERADOR (
    EMPLOPERAD_ID        INT4                 not null,
+   EMPLEADO_ID          INT4                 not null,
    DRON_ID              INT4                 not null,
    EMPLOPERAD_TIEMPOMANEJO INT4                 null,
    constraint PK_EMPLEADO_OPERADOR primary key (EMPLOPERAD_ID)
 );
 
+
+create table EMPLEADO_TECNICO (
+   TEC_ID               INT4                 not null,
+   EMPLEADO_ID          INT4                 not null,
+   constraint PK_EMPLEADO_TECNICO primary key (TEC_ID)
+);
 
 create table PROVEEDOR (
    PROV_ID              INT4                 not null,
@@ -55,9 +63,10 @@ create table REPARACION_DRON (
 create table REPARACION_REPORTE (
    REPORTE_ID           INT4                 not null,
    REPDRON_ID           INT4                 not null,
-   REPORTE_COMETARIO    CHAR(30)             not null,
+   REPORTE_COMENTARIO   CHAR(30)             null,
    constraint PK_REPARACION_REPORTE primary key (REPORTE_ID)
 );
+
 
 create table REPUESTO (
    PRODUCT_ID           INT4                 not null,
@@ -67,13 +76,6 @@ create table REPUESTO (
    constraint PK_REPUESTO primary key (PRODUCT_ID)
 );
 
-create table TECNICO (
-   TEC_ID               INT4                 not null,
-   TEC_NOMBRE           CHAR(15)             null,
-   TEC_APELLIDO         CHAR(15)             null,
-   TEC_CI               CHAR(20)             null,
-   constraint PK_TECNICO primary key (TEC_ID)
-);
 
 alter table DRON_GRABACION
    add constraint FK_DRON_GRA_GRABA_DRON foreign key (DRON_ID)
@@ -85,19 +87,24 @@ alter table DRON_TIEMPO
       references DRON (DRON_ID)
       on delete restrict on update restrict;
 
-alter table EMPLEADO
-   add constraint FK_EMPLEADO_DISPONE_EMPLEADO foreign key (EMPLOPERAD_ID)
-      references EMPLEADO_OPERADOR (EMPLOPERAD_ID)
-      on delete restrict on update restrict;
-
 alter table EMPLEADO_OPERADOR
    add constraint FK_EMPLEADO_CONTIENE_DRON foreign key (DRON_ID)
       references DRON (DRON_ID)
       on delete restrict on update restrict;
 
+alter table EMPLEADO_OPERADOR
+   add constraint FK_EMPLEADO_DISPONE_EMPLEADO foreign key (EMPLEADO_ID)
+      references EMPLEADO (EMPLEADO_ID)
+      on delete restrict on update restrict;
+
+alter table EMPLEADO_TECNICO
+   add constraint FK_EMPLEADO_TIENE_EMPLEADO foreign key (EMPLEADO_ID)
+      references EMPLEADO (EMPLEADO_ID)
+      on delete restrict on update restrict;
+
 alter table REPARACION_DRON
-   add constraint FK_REPARACI_HACE_TECNICO foreign key (TEC_ID)
-      references TECNICO (TEC_ID)
+   add constraint FK_REPARACI_HACE_EMPLEADO foreign key (TEC_ID)
+      references EMPLEADO_TECNICO (TEC_ID)
       on delete restrict on update restrict;
 
 alter table REPARACION_DRON
@@ -120,7 +127,7 @@ alter table REPUESTO
       references PROVEEDOR (PROV_ID)
       on delete restrict on update restrict;
 
---Inserccion de datos
+-Inserccion de datos
 insert into DRON (DRON_ID, DRON_FECHAOPERACION) values (1, '31/8/2019');
 insert into DRON (DRON_ID, DRON_FECHAOPERACION) values (2, '8/5/2019');
 insert into DRON (DRON_ID, DRON_FECHAOPERACION) values (3, '19/6/2019');
@@ -154,27 +161,23 @@ insert into DRON_TIEMPO (DRONTIME_ID, DRON_ID, DRONTIME_TIEMPODIA,  DRONTIME_TIE
 insert into DRON_TIEMPO (DRONTIME_ID, DRON_ID, DRONTIME_TIEMPODIA,  DRONTIME_TIEMPOTOTAL) values (9, 9, 20, 59);
 insert into DRON_TIEMPO (DRONTIME_ID, DRON_ID, DRONTIME_TIEMPODIA,  DRONTIME_TIEMPOTOTAL) values (10, 10, 10, 113);
 
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (1, 1, 130);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (2, 2, 26);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (3, 3, 22);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (4, 4, 105);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (5, 5, 54);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (6, 6, 119);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (7, 7, 43);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (8, 8, 77);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (9, 9, 54);
-insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (10, 10, 136);
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (1, 'Sybila', 'Josephsen', '960130159');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (2, 'Janka', 'De Dantesie', '387630051');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (3, 'Daria', 'Allott', '649415419');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (4, 'Rora', 'Bumpus', '542587183');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (5, 'Alberto', 'Dermot', '821822775');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (6, 'Michal', 'Gallie', '921166324');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (7, 'Ofelia', 'Darrigrand', '782408796');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (8, 'Nickolas', 'Seabrocke', '347035428');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (9, 'Gustavo', 'Butlin', '877525560');
+insert into EMPLEADO (EMPLEADO_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (10, 'Annaliese', 'Sarjeant', '257557948');
 
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (1, 1, 'Sybila', 'Josephsen', '960130159');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (2, 2, 'Janka', 'De Dantesie', '387630051');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (3, 3, 'Daria', 'Allott', '649415419');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (4, 4, 'Rora', 'Bumpus', '542587183');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (5, 5, 'Alberto', 'Dermot', '821822775');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (6, 6, 'Michal', 'Gallie', '921166324');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (7, 7, 'Ofelia', 'Darrigrand', '782408796');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (8, 8, 'Nickolas', 'Seabrocke', '347035428');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (9, 9, 'Gustavo', 'Butlin', '877525560');
-insert into EMPLEADO (EMPLEADO_ID, EMPLOPERAD_ID, EMPLEADO_NOMBRE, EMPLEADO_APELLIDO,  EMPLEADO_CI) values (10, 10, 'Annaliese', 'Sarjeant', '257557948');
+insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID,EMPLEADO_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (1,1, 1, 130);
+insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID,EMPLEADO_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (2,2, 2, 26);
+insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID,EMPLEADO_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (3,3, 3, 22);
+insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID,EMPLEADO_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (4,4, 4, 105);
+insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID,EMPLEADO_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (5,5, 5, 54);
+insert into EMPLEADO_OPERADOR (EMPLOPERAD_ID,EMPLEADO_ID, DRON_ID, EMPLOPERAD_TIEMPOMANEJO) values (6,6, 6, 119);
 
 insert into PROVEEDOR (PROV_ID, PROV_NOMBRE) values (1, 'Electrical Products');
 insert into PROVEEDOR (PROV_ID, PROV_NOMBRE) values (2, 'Retail: Computer Software');
@@ -189,30 +192,21 @@ insert into REPUESTO (PRODUCT_ID, PROV_ID, PRODUCT_FECHA, PRODUCT_NOMBRE) values
 insert into REPUESTO (PRODUCT_ID, PROV_ID, PRODUCT_FECHA, PRODUCT_NOMBRE) values (6, 4, '12/3/2019', 'Cables');
 insert into REPUESTO (PRODUCT_ID, PROV_ID, PRODUCT_FECHA, PRODUCT_NOMBRE) values (7, 2, '11/4/2020', 'Control');
 
-insert into TECNICO (TEC_ID, TEC_NOMBRE, TEC_APELLIDO, TEC_CI) values (1, 'Otto', 'Shulem', '749206461');
-insert into TECNICO (TEC_ID, TEC_NOMBRE, TEC_APELLIDO, TEC_CI) values (2, 'Kennith', 'Mulqueeny', '946387950');
-insert into TECNICO (TEC_ID, TEC_NOMBRE, TEC_APELLIDO, TEC_CI) values (3, 'Petronille', 'Philippart', '486336414');
-insert into TECNICO (TEC_ID, TEC_NOMBRE, TEC_APELLIDO, TEC_CI) values (4, 'Rees', 'Sabates', '093390682');
-insert into TECNICO (TEC_ID, TEC_NOMBRE, TEC_APELLIDO, TEC_CI) values (5, 'Aubrie', 'Georgi', '223536925');
-insert into TECNICO (TEC_ID, TEC_NOMBRE, TEC_APELLIDO, TEC_CI) values (6, 'Hillary', 'Jenkin', '669223146');
+insert into EMPLEADO_TECNICO (TEC_ID, EMPLEADO_ID) values (1, 7);
+insert into EMPLEADO_TECNICO (TEC_ID, EMPLEADO_ID) values (2, 8);
+insert into EMPLEADO_TECNICO (TEC_ID, EMPLEADO_ID) values (3, 9);
+insert into EMPLEADO_TECNICO (TEC_ID, EMPLEADO_ID) values (4, 10);
 
-insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (1, 4, 2, 6, '8/3/2020');
-insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (2, 8, 3, 5, '14/5/2020');
-insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (3, 10, 6, 3, '15/6/2019');
-insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (4, 9, 4, 1, '5/5/2020');
-insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (5, 4, 7, 1, '21/4/2020');
-insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (6, 4, 2, 6, '27/8/2020');
-insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (7, 4, 6, 2, '7/9/2019');
-insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (8, 1, 2, 6, '9/12/2020');
 
-insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMETARIO) values (1, 1, 'Error solucionado');
-insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMETARIO) values (2, 2, 'Repuesto no encontrado');
-insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMETARIO) values (3, 3, 'Sin solucion');
-insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMETARIO) values (4, 4, 'Aun en revision');
-insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMETARIO) values (5, 5, 'Bateria sobrecargada');
-insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMETARIO) values (6, 6, 'Error Solucionado');
-insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMETARIO) values (7, 7, 'Sin solucion');
-insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMETARIO) values (8, 8, 'Repuesto no encontrado');
+insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (1, 7, 2, 1, '8/3/2020');
+insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (2, 8, 3, 2, '14/5/2019');
+insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (3, 10, 4, 3, '15/6/2019');
+insert into REPARACION_DRON (REPDRON_ID, DRON_ID , PRODUCT_ID, TEC_ID, REPDRON_FECHA   ) values (4, 9, 2, 4, '5/5/2020');
+
+insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMENTARIO) values (1, 1, 'Error solucionado');
+insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMENTARIO) values (2, 2, 'Repuesto no encontrado');
+insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMENTARIO) values (3, 3, 'Sin solucion');
+insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMENTARIO) values (4, 4, 'Aun en revision');
 
 --Consultas realizadas
 
@@ -238,6 +232,17 @@ repuesto.product_nombre
 --Mostrar los mantenimientos de drones que fueron realizadas en el año 2019 y cuantas se generaron por cada día  
 
 SELECT
+reparacion_dron.repdron_id,
+count(reparacion_dron.repdron_fecha) as num_reparaciones,
+reparacion_dron.repdron_fecha
+from reparacion_dron
+where (reparacion_dron.repdron_fecha >= '1/1/2019' and reparacion_dron.repdron_fecha <='31/12/2019')
+group by reparacion_dron.repdron_id,reparacion_dron.repdron_fecha
+
+
+--Mostrar el nombre del empleado con sus horas totales de manejo de dron con el id=1 para el dron con el id=1
+
+SELECT
 empleado.empleado_id,
 dron.dron_id,
 empleado.empleado_nombre,
@@ -248,13 +253,3 @@ from empleado_operador
 INNER JOIN PUBLIC.empleado on empleado.empleado_id = empleado_operador.emploperad_id
 INNER JOIN PUBLIC.dron on dron.dron_id = empleado_operador.dron_id
 where empleado.empleado_id = 1 and dron.dron_id = 1
-
---Mostrar el nombre del empleado con sus horas totales de manejo de dron con el id=1 para el dron con el id=1
-
-SELECT
-reparacion_dron.repdron_id,
-count(reparacion_dron.repdron_fecha) as num_reparaciones,
-reparacion_dron.repdron_fecha
-from reparacion_dron
-where (reparacion_dron.repdron_fecha >= '1/6/2019' and reparacion_dron.repdron_fecha <='31/12/2019')
-group by reparacion_dron.repdron_id,reparacion_dron.repdron_fecha
