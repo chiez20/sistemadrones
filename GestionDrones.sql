@@ -210,36 +210,6 @@ insert into REPARACION_REPORTE (REPORTE_ID, REPDRON_ID, REPORTE_COMENTARIO) valu
 
 --Consultas realizadas
 
---Cuáles son los drones con más de 50 horas totales activas.
-
-SELECT dron_id,
-	   drontime_tiempototal
-FROM dron_tiempo
-where drontime_tiempototal >= '50'
-
---Consultar cuantas veces se uso el repuesto de “hélices” al momento de realizar un mantenimiento.
-
-SELECT
-repuesto.product_id,
-repuesto.product_nombre,
-count(reparacion_dron.repdron_id) as cantidad
-from reparacion_dron
-inner join public.repuesto on repuesto.product_id=reparacion_dron.product_id
-where repuesto.product_id = '2'
-group by repuesto.product_id,
-repuesto.product_nombre
-
---Mostrar los mantenimientos de drones que fueron realizadas en el año 2019 y cuantas se generaron por cada día  
-
-SELECT
-reparacion_dron.repdron_id,
-count(reparacion_dron.repdron_fecha) as num_reparaciones,
-reparacion_dron.repdron_fecha
-from reparacion_dron
-where (reparacion_dron.repdron_fecha >= '1/1/2019' and reparacion_dron.repdron_fecha <='31/12/2019')
-group by reparacion_dron.repdron_id,reparacion_dron.repdron_fecha
-
-
 --Mostrar el nombre del empleado con sus horas totales de manejo de dron con el id=1 para el dron con el id=1
 
 SELECT
@@ -253,3 +223,49 @@ from empleado_operador
 INNER JOIN PUBLIC.empleado on empleado.empleado_id = empleado_operador.emploperad_id
 INNER JOIN PUBLIC.dron on dron.dron_id = empleado_operador.dron_id
 where empleado.empleado_id = 1 and dron.dron_id = 1
+
+--Mostrar el reporte completo de cada uno de los drones a los cuales se le han hecho manteniento
+
+SELECT
+reparacion_reporte.reporte_id as Reporte_Numero,
+reparacion_dron.repdron_id as Codigo_de_Reparacion,
+empleado.empleado_nombre as Empleado_Encargado,
+empleado_tecnico.tec_id as Tecnico_Id,
+dron.dron_id as Codigo_del_Dron,
+repuesto.product_nombre as Repuesto_usado,
+proveedor.prov_nombre as proveedor,
+reparacion_dron.repdron_fecha as Fecha_de_Reparacion,
+reparacion_reporte.reporte_comentario as Comentario
+FROM reparacion_dron
+INNER JOIN PUBLIC.dron on dron.dron_id = reparacion_dron.dron_id
+INNER JOIN PUBLIC.repuesto on repuesto.product_id = reparacion_dron.product_id
+INNER JOIN PUBLIC.empleado_tecnico on empleado_tecnico.tec_id = reparacion_dron.tec_id
+INNER JOIN PUBLIC.empleado on empleado.empleado_id = empleado_tecnico.empleado_id
+INNER JOIN PUBLIC.reparacion_reporte on reparacion_reporte.reporte_Id = reparacion_dron.repdron_id
+INNER JOIN PUBLIC.proveedor on proveedor.prov_id =repuesto.prov_id
+
+--Consultar cuantas veces se uso el repuesto de “hélices” al momento de realizar un mantenimiento.
+
+SELECT
+repuesto.product_id,
+repuesto.product_nombre,
+count(reparacion_dron.repdron_id) as cantidad
+from reparacion_dron
+inner join public.repuesto on repuesto.product_id=reparacion_dron.product_id
+where repuesto.product_id = '2'
+group by repuesto.product_id,
+repuesto.product_nombre
+
+
+
+--Mostrar los mantenimientos de drones que fueron realizadas en el año 2019 y cuantas se generaron por cada día  
+
+SELECT
+reparacion_dron.repdron_id,
+count(reparacion_dron.repdron_fecha) as num_reparaciones,
+reparacion_dron.repdron_fecha
+from reparacion_dron
+where (reparacion_dron.repdron_fecha >= '1/1/2019' and reparacion_dron.repdron_fecha <='31/12/2019')
+group by reparacion_dron.repdron_id,reparacion_dron.repdron_fecha
+
+
